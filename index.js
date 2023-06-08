@@ -32,6 +32,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const usersCollection=client.db('Amping').collection('users');
+    const classesCollection=client.db('Amping').collection('classes');
 
     app.put('/users/:email',async(req,res)=>{
         const email=req.params.email;
@@ -48,6 +49,12 @@ async function run() {
       const result=await usersCollection.find({}).toArray();
       res.send(result);
     })
+
+    app.post('/classes',async(req,res)=>{
+      const classes=req.body;
+      const result=await classesCollection.insertOne(classes);
+      res.send(result); 
+    });
    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
