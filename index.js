@@ -15,7 +15,7 @@ app.use(express.json())
 //Amping
 //CBOWMU7KdvC5GwaG
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.4doag.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -55,6 +55,16 @@ async function run() {
       const result=await classesCollection.insertOne(classes);
       res.send(result); 
     });
+    app.get('/classes',async(req,res)=>{
+      const result=await classesCollection.find({}).toArray();
+      res.send(result);
+    });
+    app.get('/classes/:id',async(req,res)=>{
+      const id = req.params.id 
+      const query = {_id:new ObjectId(id)}
+      const result = await classesCollection.findOne(query)
+      res.send(result)
+    })
    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
