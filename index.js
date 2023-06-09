@@ -33,6 +33,7 @@ async function run() {
     await client.connect();
     const usersCollection=client.db('Amping').collection('users');
     const classesCollection=client.db('Amping').collection('classes');
+    const instructorCollection=client.db('Amping').collection('instructors');
 
     app.put('/users/:email',async(req,res)=>{
         const email=req.params.email;
@@ -55,6 +56,23 @@ async function run() {
       const result=await classesCollection.insertOne(classes);
       res.send(result); 
     });
+    app.post('/instructor',async(req,res)=>{
+      const instructor=req.body;
+      const result=await instructorCollection.insertOne(instructor);
+      res.send(result);
+    })
+    app.get('/instructor',async(req,res)=>{
+      const result=await instructorCollection.find({}).toArray();
+      res.send(result);
+    });
+    //showing individual class data
+
+    app.get("/classes/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await classesCollection.find({email: email,}).toArray();
+      res.send(result);
+    });
+
     app.get('/classes',async(req,res)=>{
       const result=await classesCollection.find({}).toArray();
       res.send(result);
@@ -65,6 +83,37 @@ async function run() {
       const result = await classesCollection.findOne(query)
       res.send(result)
     })
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+  })
+
+  app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+          $set: {
+              role: 'admin'
+          },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+  })
+
+  app.patch('/users/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+          $set: {
+              role: 'instructor'
+          },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+  })
+
    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
