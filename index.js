@@ -97,27 +97,27 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/class/deny/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
-        $set: {
-          status: "denied",
-        },
-      };
-      const result = await classesCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+    // app.patch("/class/deny/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const updateDoc = {
+    //     $set: {
+    //       status: "denied",
+    //     },
+    //   };
+    //   const result = await classesCollection.updateOne(filter, updateDoc);
+    //   res.send(result);
+    // });
 
     //get data by status
 
-    // app.get("/approvedClasses", async (req, res) => {
-    //   const status = req.query.status;
-    //   console.log(status);
-    //   const result = await classesCollection.find({ status: status }).toArray();
+    app.get("/approvedClasses", async (req, res) => {
+      const status = req.query.status;
+      console.log(status);
+      const result = await classesCollection.find({ status: status }).toArray();
 
-    //   res.send(result);
-    // });
+      res.send(result);
+    });
 
 
     app.delete('/users/:id', async (req, res) => {
