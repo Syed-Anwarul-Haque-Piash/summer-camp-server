@@ -77,12 +77,12 @@ async function run() {
       const result=await classesCollection.find({}).toArray();
       res.send(result);
     });
-    app.get('/classes/:id',async(req,res)=>{
-      const id = req.params.id 
-      const query = {_id:new ObjectId(id)}
-      const result = await classesCollection.findOne(query)
-      res.send(result)
-    });
+    // app.get('/classes/:id',async(req,res)=>{
+    //   const id = req.params.id 
+    //   const query = {_id:new ObjectId(id)}
+    //   const result = await classesCollection.findOne(query)
+    //   res.send(result)
+    // });
 
     //approve class admin dashboard
     app.patch("/class/approve/:id", async (req, res) => {
@@ -97,17 +97,17 @@ async function run() {
       res.send(result);
     });
 
-    // app.patch("/class/deny/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const updateDoc = {
-    //     $set: {
-    //       status: "denied",
-    //     },
-    //   };
-    //   const result = await classesCollection.updateOne(filter, updateDoc);
-    //   res.send(result);
-    // });
+    app.patch("/class/deny/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     //get data by status
 
