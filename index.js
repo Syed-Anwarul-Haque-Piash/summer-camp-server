@@ -82,7 +82,44 @@ async function run() {
       const query = {_id:new ObjectId(id)}
       const result = await classesCollection.findOne(query)
       res.send(result)
-    })
+    });
+
+    //approve class admin dashboard
+    app.patch("/class/approve/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.patch("/class/deny/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    //get data by status
+
+    app.get("/approvedClasses", async (req, res) => {
+      const status = req.query.status;
+      console.log(status);
+      const result = await classesCollection.find({ status: status }).toArray();
+
+      res.send(result);
+    });
+
+
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -102,17 +139,17 @@ async function run() {
       res.send(result);
   })
 
-  app.patch('/users/instructor/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
-          $set: {
-              role: 'instructor'
-          },
-      };
-      const result = await usersCollection.updateOne(filter, updateDoc);
-      res.send(result);
-  })
+  // app.patch('/users/instructor/:id', async (req, res) => {
+  //     const id = req.params.id;
+  //     const filter = { _id: new ObjectId(id) };
+  //     const updateDoc = {
+  //         $set: {
+  //             role: 'instructor'
+  //         },
+  //     };
+  //     const result = await usersCollection.updateOne(filter, updateDoc);
+  //     res.send(result);
+  // })
 
    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
