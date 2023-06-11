@@ -77,12 +77,12 @@ async function run() {
       const result=await classesCollection.find({}).toArray();
       res.send(result);
     });
-    // app.get('/classes/:id',async(req,res)=>{
-    //   const id = req.params.id 
-    //   const query = {_id:new ObjectId(id)}
-    //   const result = await classesCollection.findOne(query)
-    //   res.send(result)
-    // });
+    app.get('/classes/:id',async(req,res)=>{
+      const id = req.params.id 
+      const query = {_id:new ObjectId(id)}
+      const result = await classesCollection.findOne(query)
+      res.send(result)
+    });
 
     //approve class admin dashboard
     app.patch("/class/approve/:id", async (req, res) => {
@@ -118,6 +118,21 @@ async function run() {
 
       res.send(result);
     });
+
+    app.put('/feedback/:id',async(req,res)=>{
+      const id=req.params.id;
+      console.log(id);
+      const body=req.body;
+      const query={_id:new ObjectId(id)}
+      const updateDoc={
+        $set: {
+          feedback:body
+        }
+      }
+      const result=await classesCollection.updateOne(query,updateDoc)
+      console.log(result)
+      res.send(result);
+    })
 
 
     app.delete('/users/:id', async (req, res) => {
