@@ -34,6 +34,7 @@ async function run() {
     const usersCollection=client.db('Amping').collection('users');
     const classesCollection=client.db('Amping').collection('classes');
     const instructorCollection=client.db('Amping').collection('instructors');
+    const addtocartCollection=client.db('Amping').collection('addtocart');
 
     app.put('/users/:email',async(req,res)=>{
         const email=req.params.email;
@@ -165,6 +166,18 @@ async function run() {
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
   })
+  //addtocart
+  app.post('/addtocart',async(req,res)=>{
+    const info=req.body;
+    const result=await addtocartCollection.insertOne(info);
+    res.send(result);
+  })
+  app.get('/addtocart',async(req,res)=>{
+    const result=await addtocartCollection.find({}).toArray();
+    res.send(result);
+  })
+
+  
 
    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
