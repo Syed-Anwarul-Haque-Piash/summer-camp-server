@@ -95,6 +95,31 @@ async function run() {
       const result = { admin: user?.role === "admin" };
       res.send(result);
     });
+    // verifyInstructor
+
+    const verifyInstructor = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "instructor") {
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden access" });
+      }
+      next();
+    };
+
+    // check instructor and verify instructor
+    app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        return res.send({ instructor: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { instructor: user?.role === "instructor" };
+      res.send(result);
+    });
 
     app.put('/users/:email',async(req,res)=>{
         const email=req.params.email;
@@ -142,14 +167,7 @@ async function run() {
       const result=await classesCollection.find({}).toArray();
       res.send(result);
     });
-    // app.get('/classes/:id',async(req,res)=>{
-    //   const id = req.params.id
-    //   console.log(id)
-    //   const query = {_id: new ObjectId(id)}
-    //   console.log(query);
-    //   const result = await classesCollection.findOne(query)
-    //   res.send(result)
-    // });
+   
     app.get('/singleclass/:id', async(req,res)=>{
       const id=req.params.id
      // console.log(id);
@@ -263,6 +281,8 @@ async function run() {
     const result=await addtocartCollection.find({}).toArray();
     res.send(result);
   })
+  
+
 
   app.get('/addtoclass/:id',async(req,res)=>{
     const id=req.params.id;
@@ -272,6 +292,8 @@ async function run() {
     //console.log(result);
     res.send(result);
   })
+
+  
   // create payment intent
   app.post("/create-payment-intent", async (req, res) => {
     const { price } = req.body;
@@ -290,7 +312,7 @@ async function run() {
   app.post("/payments", async (req, res) => {
     const payment = req.body;
     const beforePaymentClassId = payment.beforePaymentClassId;
-    console.log(beforePaymentClassId)
+    //console.log(beforePaymentClassId)
 
     // Decrement the available seats count by 1 in the classes collection
     const updateResult = await classesCollection.updateOne(
@@ -302,12 +324,13 @@ async function run() {
     const sendDataToPaymentCollections = await paymentCollection.insertOne(
       payment
     );
-    const id = payment.beforePaymentClassId;
+    //const id = payment.beforePaymentClassId;
 
     const query = { _id: new ObjectId(id) };
     const deleteResult = await addtocartCollection.deleteOne(query);
     res.send({ updateResult, deleteResult });
   });
+ 
   // Fetch the top 6 classes based on the number of students
   app.get("/popularClasses", async (req, res) => {
     const query = { status: "approved" };
