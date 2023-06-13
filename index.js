@@ -3,6 +3,7 @@ const cors=require('cors');
 const app = express();
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
+const stripe = require("stripe")(process.env.PAYEMNT_KEY);
 const port = process.env.PORT || 5000;
 //app.use(cors());
 app.use(express.json());
@@ -58,6 +59,7 @@ async function run() {
     const classesCollection=client.db('Amping').collection('classes');
     const instructorCollection=client.db('Amping').collection('instructors');
     const addtocartCollection=client.db('Amping').collection('addtocart');
+    const paymentCollection=client.db('Amping').collection('paymentSuccessList');
 
     // JWT
     app.post("/jwt", (req, res) => {
@@ -236,6 +238,61 @@ async function run() {
     const result=await addtocartCollection.find({}).toArray();
     res.send(result);
   })
+
+  app.get('/addtoclass/:id',async(req,res)=>{
+    const id=req.params.id;
+    console.log(id);
+    const filter = { _id: new ObjectId(id) };
+    const result=await addtocartCollection.findOne(filter);
+    console.log(result);
+    res.send(result);
+  })
+  // create payment intent
+  app.post("/create-payment-intent", async (req, res) => {
+    const { price } = req.body;
+    const amount = price * 100;
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: "usd",
+      payment_method_types: ["card"],
+    });
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  });
+  app.post("/payments", async (req, res) => {
+    const payment = req.body;
+    const beforePaymentClassId = payment.beforePaymentClassId;
+    console.log(beforePaymentClassId)
+
+    // Decrement the available seats count by 1 in the classes collection
+    const updateResult = await classesCollection.updateOne(
+      { _id: new ObjectId(beforePaymentClassId) },
+      { $inc: { enrolledStudent: 1, availableSeat: -1 } }
+    );
+    console.log(updateResult)
+
+    const sendDataToPaymentCollections = await paymentCollection.insertOne(
+      payment
+    );
+    const id = payment.beforePaymentClassId;
+
+    const query = { _id: new ObjectId(id) };
+    const deleteResult = await addtocartCollection.deleteOne(query);
+    res.send({ updateResult, deleteResult });
+  });
+  // Fetch the top 6 classes based on the number of students
+  app.get("/popularClasses", async (req, res) => {
+    const query = { status: "approved" };
+    const result = await classesCollection
+      .find(query)
+      .sort({
+        enrolledStudent: -1,
+      })
+      .limit(6)
+      .toArray();
+    res.send(result);
+  });
 
   
 
