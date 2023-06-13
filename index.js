@@ -84,10 +84,10 @@ async function run() {
       const result=await usersCollection.find({}).toArray();
       res.send(result);
     })
-    // app.get('/usersrole',async(req,res)=>{
-    //   const result=await usersCollection.find({role:"instructor"}).toArray();
-    //   res.send(result);
-    // })
+    app.get('/usersrole',async(req,res)=>{
+      const result=await usersCollection.find({role:"instructor"}).toArray();
+      res.send(result);
+    })
 
     app.post('/classes',async(req,res)=>{
       const classes=req.body;
