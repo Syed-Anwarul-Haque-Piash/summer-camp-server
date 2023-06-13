@@ -14,8 +14,7 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 app.use(express.json())
-//Amping
-//CBOWMU7KdvC5GwaG
+
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization;
   console.log(authorization);
@@ -54,7 +53,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+     client.connect();
     const usersCollection=client.db('Amping').collection('users');
     const classesCollection=client.db('Amping').collection('classes');
     const instructorCollection=client.db('Amping').collection('instructors');
