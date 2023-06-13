@@ -84,6 +84,10 @@ async function run() {
       const result=await usersCollection.find({}).toArray();
       res.send(result);
     })
+    // app.get('/usersrole',async(req,res)=>{
+    //   const result=await usersCollection.find({role:"instructor"}).toArray();
+    //   res.send(result);
+    // })
 
     app.post('/classes',async(req,res)=>{
       const classes=req.body;
@@ -111,12 +115,35 @@ async function run() {
       const result=await classesCollection.find({}).toArray();
       res.send(result);
     });
-    app.get('/classes/:id',async(req,res)=>{
-      const id = req.params.id 
-      const query = {_id:new ObjectId(id)}
+    // app.get('/classes/:id',async(req,res)=>{
+    //   const id = req.params.id
+    //   console.log(id)
+    //   const query = {_id: new ObjectId(id)}
+    //   console.log(query);
+    //   const result = await classesCollection.findOne(query)
+    //   res.send(result)
+    // });
+    app.get('/singleclass/:id', async(req,res)=>{
+      const id=req.params.id
+      console.log(id);
+      const query = {_id: new ObjectId(id)}
+      console.log(query);
       const result = await classesCollection.findOne(query)
-      res.send(result)
+      res.send(result);
     });
+    app.put('/classes/:id',async(req,res)=>{
+      const id=req.params.id;
+      const update=req.body;
+      const query={ _id: new ObjectId(id)};
+      //const options = { upsert: true };
+      const updatedClass={
+          $set:{
+             ...update
+          }
+      }
+      const result=await classesCollection.updateOne(query,updatedClass);
+      res.send(result);
+  });
 
     //approve class admin dashboard
     app.patch("/class/approve/:id", async (req, res) => {
