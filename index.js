@@ -70,6 +70,31 @@ async function run() {
       // console.log({ token });
       res.send({ token });
     });
+    // verifyAdmin
+
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "admin") {
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden access" });
+      }
+      next();
+    };
+
+    // check admin and verifyJWT
+    app.get("/users/admin/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        return res.send({ admin: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === "admin" };
+      res.send(result);
+    });
 
     app.put('/users/:email',async(req,res)=>{
         const email=req.params.email;
@@ -109,7 +134,7 @@ async function run() {
 
     app.get("/classes/:email", async (req, res) => {
       const email = req.params.email;
-      const result = await classesCollection.find({email: email,}).toArray();
+      const result = await classesCollection.find({instructorEmail: email,}).toArray();
       res.send(result);
     });
 
@@ -127,9 +152,9 @@ async function run() {
     // });
     app.get('/singleclass/:id', async(req,res)=>{
       const id=req.params.id
-      console.log(id);
+     // console.log(id);
       const query = {_id: new ObjectId(id)}
-      console.log(query);
+      //console.log(query);
       const result = await classesCollection.findOne(query)
       res.send(result);
     });
@@ -176,7 +201,7 @@ async function run() {
 
     app.get("/approvedClasses", async (req, res) => {
       const status = req.query.status;
-      console.log(status);
+      //console.log(status);
       const result = await classesCollection.find({ status: status }).toArray();
 
       res.send(result);
@@ -184,7 +209,7 @@ async function run() {
 
     app.put('/feedback/:id',async(req,res)=>{
       const id=req.params.id;
-      console.log(id);
+      //console.log(id);
       const body=req.body;
       const query={_id:new ObjectId(id)}
       const updateDoc={
@@ -193,7 +218,7 @@ async function run() {
         }
       }
       const result=await classesCollection.updateOne(query,updateDoc)
-      console.log(result)
+      //console.log(result)
       res.send(result);
     })
 
@@ -241,15 +266,17 @@ async function run() {
 
   app.get('/addtoclass/:id',async(req,res)=>{
     const id=req.params.id;
-    console.log(id);
+    //console.log(id);
     const filter = { _id: new ObjectId(id) };
     const result=await addtocartCollection.findOne(filter);
-    console.log(result);
+    //console.log(result);
     res.send(result);
   })
   // create payment intent
   app.post("/create-payment-intent", async (req, res) => {
     const { price } = req.body;
+    const priceAsNumber = parseFloat(price);
+    console.log(typeof priceAsNumber);
     const amount = price * 100;
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
@@ -259,7 +286,7 @@ async function run() {
     res.send({
       clientSecret: paymentIntent.client_secret,
     });
-  });
+   });
   app.post("/payments", async (req, res) => {
     const payment = req.body;
     const beforePaymentClassId = payment.beforePaymentClassId;
